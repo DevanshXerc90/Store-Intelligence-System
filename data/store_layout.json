@@ -1,0 +1,46 @@
+{
+  "stores": {
+    "STORE_1": {
+      "store_name": "Apex Store 1",
+      "city": "Mumbai",
+      "open_hours": "10:00-22:00",
+      "zones": {
+        "entrance": {
+          "name": "Entrance Threshold",
+          "cameras": ["CAM_3"]
+        },
+        "skincare": {
+          "name": "Skincare Aisle",
+          "cameras": ["CAM_1"]
+        },
+        "makeup": {
+          "name": "Makeup Aisle",
+          "cameras": ["CAM_2"]
+        },
+        "billing": {
+          "name": "Billing Counter",
+          "cameras": ["CAM_5"]
+        }
+      }
+    },
+    "STORE_2": {
+      "store_name": "Apex Store 2",
+      "city": "Bangalore",
+      "open_hours": "10:00-22:00",
+      "zones": {
+        "entrance": {
+          "name": "Entrance Threshold",
+          "cameras": ["ENTRY_1", "ENTRY_2"]
+        },
+        "makeup": {
+          "name": "Floor Zone",
+          "cameras": ["ZONE"]
+        },
+        "billing": {
+          "name": "Billing Area",
+          "cameras": ["BILLING"]
+        }
+      }
+    }
+  }
+}

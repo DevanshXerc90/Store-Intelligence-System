@@ -1,0 +1,68 @@
+services:
+  # ── Redis — Event bus for streaming detection events ──────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6389:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Detector — CCTV video processing pipeline ─────────────────
+  detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m src.detector.main
+    volumes:
+      - ${VIDEO_DIR:-./data/videos}:/app/data/videos:ro
+      - ./data/store_layout.json:/app/data/store_layout.json:ro
+    environment:
+      - REDIS_HOST=redis
+      - VIDEO_DIR=/app/data/videos
+      - TARGET_FPS=${TARGET_FPS:-5}
+      - PERSON_CONFIDENCE=${PERSON_CONFIDENCE:-0.35}
+      - VIRTUAL_LINE_Y=${VIRTUAL_LINE_Y:-650}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # ── API — REST API + Event Consumer + Post-Processing ─────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m src.api.main
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/app/data/db
+      - ./data/sales:/app/data/sales:ro
+      - ./data/store_layout.json:/app/data/store_layout.json:ro
+    environment:
+      - REDIS_HOST=redis
+      - DB_PATH=/app/data/db/store.db
+      - SALES_CSV=/app/data/sales/sales.csv
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  db-data:
