@@ -27,7 +27,7 @@ from src.database import Database
 from src.processor.event_consumer import EventConsumer
 from src.processor.session_builder import SessionBuilder
 from src.processor.anomaly_detector import AnomalyDetector
-from src.api.routes import metrics, funnel, anomalies, ingest, health, heatmap
+from src.api.routes import metrics, funnel, anomalies, ingest, health, heatmap, dashboard
 
 # Configure structured logging
 structlog.configure(
@@ -267,6 +267,7 @@ app.include_router(funnel.router)
 app.include_router(heatmap.router)
 app.include_router(anomalies.router)
 app.include_router(ingest.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/", tags=["Root"])
@@ -276,6 +277,7 @@ async def root():
         "system": "Purplle Store Intelligence",
         "version": "1.0.0",
         "endpoints": {
+            "dashboard": "/dashboard",
             "health": "/health",
             "metrics": "/stores/{store_id}/metrics",
             "funnel": "/stores/{store_id}/funnel",
