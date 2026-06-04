@@ -70,6 +70,7 @@ python -m pytest tests/ -v
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | GET | Service status, last event timestamp per store, STALE_FEED alerts |
+| `/dashboard` | GET | Interactive, premium real-time Store Intelligence Dashboard (KPIs, Funnel, Heatmap, Alerts, Live Stream) |
 | `/stores/{store_id}/metrics` | GET | Today's unique visitors, conversion rate, zone dwell, queue depth, abandonment rate |
 | `/stores/{store_id}/funnel` | GET | Customer journey: Entry → Zone Visit → Billing Queue → Purchase (with counts and drop-offs) |
 | `/stores/{store_id}/heatmap` | GET | Normalised zone traffic score (0-100) and data confidence scoring |
