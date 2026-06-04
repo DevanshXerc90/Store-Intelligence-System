@@ -1192,28 +1192,28 @@ async def get_dashboard():
         function updateMetrics(metrics) {
             if (!metrics) return;
 
-            document.getElementById("kpiVisitors").innerText = metrics.unique_visitors !== undefined ? metrics.unique_visitors : "0";
+            document.getElementById("kpiVisitors").innerText = metrics.unique_visitors != null ? metrics.unique_visitors : "0";
             
-            const conversion = metrics.conversion_rate !== undefined ? (metrics.conversion_rate * 100).toFixed(1) + "%" : "0.0%";
+            const conversion = metrics.conversion_rate != null ? (metrics.conversion_rate * 100).toFixed(1) + "%" : "0.0%";
             document.getElementById("kpiConversion").innerText = conversion;
 
-            document.getElementById("kpiQueueDepth").innerText = metrics.queue_depth !== undefined ? metrics.queue_depth : "0";
+            document.getElementById("kpiQueueDepth").innerText = metrics.queue_depth != null ? metrics.queue_depth : "0";
 
-            const abandonment = metrics.abandonment_rate !== undefined ? (metrics.abandonment_rate * 100).toFixed(1) + "%" : "0.0%";
+            const abandonment = metrics.abandonment_rate != null ? (metrics.abandonment_rate * 100).toFixed(1) + "%" : "0.0%";
             document.getElementById("kpiAbandonment").innerText = abandonment;
         }
 
-        function updateFunnel(funnel) {
+        function updateFunnel(funnelRes) {
             const container = document.getElementById("funnelContainer");
             const confidenceBadge = document.getElementById("funnelConfidence");
 
-            if (!funnel || !funnel.stages) {
+            if (!funnelRes || !funnelRes.funnel) {
                 container.innerHTML = '<div class="error-message">Unable to load funnel data</div>';
                 return;
             }
 
             // Set data confidence flag
-            if (funnel.data_confidence === "LOW") {
+            if (funnelRes.data_confidence === "LOW") {
                 confidenceBadge.className = "confidence-indicator low";
                 confidenceBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Low Data Confidence';
             } else {
@@ -1223,7 +1223,11 @@ async def get_dashboard():
 
             // Render stages
             let html = "";
-            const stages = funnel.stages;
+            const stagesMap = {};
+            funnelRes.funnel.forEach(item => {
+                stagesMap[item.stage] = item;
+            });
+
             const stageKeys = ["entry", "zone_visit", "billing_queue", "purchase"];
             const stageLabels = {
                 "entry": { name: "1. Entrance", sub: "Unique Footfall Sessions" },
@@ -1233,16 +1237,16 @@ async def get_dashboard():
             };
 
             stageKeys.forEach((key, index) => {
-                const data = stages[key] || { count: 0, percentage: 0, dropoff_percentage: 0 };
+                const data = stagesMap[key] || { count: 0, pct: 0, drop_off_pct: 0 };
                 const label = stageLabels[key];
                 const count = data.count;
-                const pct = (data.percentage * 100).toFixed(0) + "%";
+                const pct = data.pct.toFixed(0) + "%";
                 const isPink = index % 2 !== 0;
 
                 // Only show drop-off on stages after entry, if there actually is a drop-off
                 let dropoffHtml = "";
-                if (index > 0 && data.dropoff_percentage > 0) {
-                    const dropoffVal = (data.dropoff_percentage * 100).toFixed(0);
+                if (index > 0 && data.drop_off_pct > 0) {
+                    const dropoffVal = data.drop_off_pct.toFixed(0);
                     dropoffHtml = `<span class="funnel-dropoff"><i class="fa-solid fa-arrow-down"></i> -${dropoffVal}% drop-off</span>`;
                 }
 
@@ -1253,7 +1257,7 @@ async def get_dashboard():
                         <span class="funnel-label-sub">${label.sub}</span>
                     </div>
                     <div class="funnel-bar-wrapper">
-                        <div class="funnel-bar-fill ${isPink ? 'pink' : ''}" style="width: ${data.percentage * 100}%;"></div>
+                        <div class="funnel-bar-fill ${isPink ? 'pink' : ''}" style="width: ${data.pct}%;"></div>
                         <span class="funnel-count">${count}</span>
                         <span class="funnel-percent">${pct}</span>
                     </div>
@@ -1278,7 +1282,7 @@ async def get_dashboard():
 
             let html = "";
             heatmap.zones.forEach(zone => {
-                const score = Math.round(zone.traffic_score || 0);
+                const score = Math.round(zone.normalised_score || 0);
                 const dwellSeconds = Math.round((zone.avg_dwell_ms || 0) / 1000);
                 const dwellStr = dwellSeconds >= 60 
                     ? `${Math.floor(dwellSeconds / 60)}m ${dwellSeconds % 60}s` 
