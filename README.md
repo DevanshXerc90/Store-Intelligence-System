@@ -2,6 +2,7 @@
 
 AI-powered store analytics combining CCTV computer vision with POS data for real-time business intelligence across multiple stores.
 
+- **Live Public Demo**: [https://5befa08c77882b.lhr.life/dashboard](https://5befa08c77882b.lhr.life/dashboard)
 - **Stores Supported**: Store 1 (ST1076/STORE_1) and Store 2 (STORE_2)
 - **Acceptance Gate Target**: `GET /stores/STORE_BLR_002/metrics`
 
