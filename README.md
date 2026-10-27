@@ -1,4 +1,4 @@
-# Purplle Store Intelligence System
+# Store Intelligence System
 
 AI-powered store analytics combining CCTV computer vision with POS data for real-time business intelligence across multiple stores.
 
